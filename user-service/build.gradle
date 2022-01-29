@@ -1,0 +1,112 @@
+// Para integrar apring con grpc
+buildscript {
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.2.7.RELEASE")
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.6.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+
+	//	Plugin para grpc
+	id 'com.google.protobuf' version '0.8.17'
+}
+
+group = 'com.doctor'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('springCloudVersion', "2021.0.0")
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	runtimeOnly 'mysql:mysql-connector-java'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.5'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap', version: '3.1.0'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: '2.6.2'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+
+
+//	Para anotaciones de GRPC NECESITA ESTAR ACTUALIZADA
+	implementation 'net.devh:grpc-client-spring-boot-starter:2.13.0.RELEASE'
+
+//	Dependencias necesarias para grpc
+	runtimeOnly 'io.grpc:grpc-netty-shaded:1.43.1'
+	implementation 'io.grpc:grpc-protobuf:1.43.1'
+	implementation 'io.grpc:grpc-stub:1.43.1'
+//	Termina implementacion de dependencias grpc
+
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
+
+
+//Dependencia de potobuf
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:3.19.1"
+	}
+	plugins {
+		grpc {
+			artifact = 'io.grpc:protoc-gen-grpc-java:1.43.1'
+		}
+	}
+	generateProtoTasks {
+		all()*.plugins {
+			grpc {}
+		}
+	}
+}
+
+//Para carpeta donde se guarda el codigo que genera protobufs
+sourceSets {
+	main {
+		proto {
+			// In addition to the default 'src/main/proto'
+			srcDir 'src/main/protobuf'
+			srcDir 'src/main/protocolbuffers'
+			// In addition to the default '**/*.proto' (use with caution).
+			// Using an extension other than 'proto' is NOT recommended,
+			// because when proto files are published along with class files, we can
+			// only tell the type of a file from its extension.
+			include '**/*.protodevel'
+		}
+		java {
+
+		}
+	}
+	test {
+		proto {
+			// In addition to the default 'src/test/proto'
+			srcDir 'src/test/protocolbuffers'
+		}
+	}
+}

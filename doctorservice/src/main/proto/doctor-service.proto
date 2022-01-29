@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.doctorsrvc.grpc";
+
+service doctorService{
+  rpc getDoctorById(doctorId) returns (Doctor){}
+  rpc getAllDoctors(Empty) returns(DoctorsList){}
+  rpc updateDoctorById(Doctor) returns(Doctor){}
+}
+
+message doctorId{
+  int64 id = 1;
+}
+
+message Doctor{
+  int64 id = 1;
+  int32 userdId = 2;
+  float fee = 3;
+  int32 specialtyId = 4;
+  int32 shiftId = 5;
+  int32 status = 6;
+}
+
+message Empty{
+
+}
+
+message DoctorsList{
+  repeated Doctor doctorsList = 1;
+}
